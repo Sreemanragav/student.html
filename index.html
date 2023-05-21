@@ -1,0 +1,103 @@
+<?php
+include 'db.php';
+
+// Function to sanitize user input
+function cleanInput($input)
+{
+    $input = trim($input);
+    $input = stripslashes($input);
+    $input = htmlspecialchars($input);
+    return $input;
+}
+
+// Check if the form is submitted for adding a new student
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add_submit"])) {
+    // Validate and sanitize input
+    $name = cleanInput($_POST["name"]);
+    $subject = cleanInput($_POST["subject"]);
+    $marks = cleanInput($_POST["marks"]);
+
+    // Insert the new student record into the database
+    $sql = "INSERT INTO students (name, subject, marks) VALUES ('$name', '$subject', '$marks')";
+    if ($conn->query($sql) === TRUE) {
+        header("Location: index.php");
+        exit();
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+// Check if the form is submitted for editing a student
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["edit_submit"])) {
+    // Validate and sanitize input
+    $id = cleanInput($_POST["id"]);
+    $name = cleanInput($_POST["name"]);
+    $subject = cleanInput($_POST["subject"]);
+    $marks = cleanInput($_POST["marks"]);
+
+    // Update the student record in the database
+    $sql = "UPDATE students SET name='$name', subject='$subject', marks='$marks' WHERE id='$id'";
+    if ($conn->query($sql) === TRUE) {
+        header("Location: index.php");
+        exit();
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+// Check if the delete action is triggered
+if (isset($_GET["delete"])) {
+    $id = cleanInput($_GET["delete"]);
+
+    // Delete the student record from the database
+    $sql = "DELETE FROM students WHERE id='$id'";
+    if ($conn->query($sql) === TRUE) {
+        header("Location: index.php");
+        exit();
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+// Fetch all student records from the database
+$result = $conn->query("SELECT * FROM students");
+
+// Display the records in a table
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Marks</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Student Marks</h1>
+    <a href='add.php'>Add New Student</a><br><br>
+    <?php
+    if ($result->num_rows > 0) {
+        echo "<table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row['id'] . "</td>";
+            echo "<td>" . $row['name'] . "</td>";
+            echo "<td>" . $row['subject'] . "</td>";
+            echo "<td>" . $row['marks']
+
